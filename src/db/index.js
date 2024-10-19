@@ -10,8 +10,8 @@ try{
   throw new Error("MONGODB_URI is not defined in environment variables");
  }
 
- const connectionInstance = await mongoose.connect(`${MONGODB_URI}`);
- console.log(connectionInstance.connection.host);
+ const connectionInstance = await mongoose.connect(MONGODB_URI,{dbName:"Major"});
+ console.log("MongoDb connected to database",connectionInstance.connection.host);
 
 
 
