@@ -3,7 +3,6 @@ import bcrypt from "bcrypt";
 import { companySchema } from "../schema/company.js";
 import { ApiError } from "../../utils/ApiErrors.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
-import { generateAccessToken, generateRefreshToken } from "../../utils/generateTokens.js";
 import { validateEmail, validatePassword } from "../../utils/validators.js";
 
 const Company =  mongoose.model("companies", companySchema);
@@ -11,28 +10,37 @@ const Company =  mongoose.model("companies", companySchema);
 
 const registerCompany = asyncHandler(async (req, res) => {
   const {
-    companyName,
-    email,
-    password,
-    industry,
-    contactPerson,
-    phoneNumber,
-    websiteUrl,
-    companySize,
-    registrationNumber,
-    companyAddress,
-    description
+   // Company Info
+   name,
+   email,
+   registrationNumber,
+   industry,
+   size,
+   website,
+   description,
+   logo,
+
+   // Contact Info
+   contactPerson,
+   phoneNumber,
+   address,
+
+   // Auth
+   password,
+
+   // Optional Documents
+   documents
   } = req.body;
 
   // Validate required fields
   const requiredFields = [
-    companyName,
+    name,
     email,
     password,
+    registrationNumber,
     industry,
     contactPerson,
-    phoneNumber,
-    registrationNumber
+    phoneNumber
   ];
 
   if (requiredFields.some((field) => !field?.trim())) {
@@ -63,52 +71,56 @@ const registerCompany = asyncHandler(async (req, res) => {
 
   const registeredCompany = await Company.create({
     companyInfo: {
-      name: companyName.trim(),
+      name: name.trim(),
       email: email.toLowerCase(),
       registrationNumber: registrationNumber.trim(),
       industry: industry.trim(),
-      size: companySize,
-      website: websiteUrl?.trim(),
-      description: description?.trim()
+      size: size?.trim(),
+      website: website?.trim(),
+      description: description?.trim(),
+      logo: logo?.trim()
     },
     contactInfo: {
       personName: contactPerson.trim(),
       phoneNumber: phoneNumber.trim(),
-      address: companyAddress?.trim()
+      address: address?.trim()
     },
     auth: {
       password: hashedPassword
     },
     verificationStatus: "pending",
     subscriptionPlan: "basic",
-    jobPostingCredits: 5 // Default free credits
+    jobPostingCredits: 5,
+    documents: documents?.map(doc => ({
+      type: doc.type?.trim(),
+      url: doc.url?.trim(),
+      verified: false
+    })) || [],
+    postedJobs: []
   });
 
   if (!registeredCompany) {
     throw new ApiError(500, "Failed to register company");
   }
 
-  const companyResponse = registeredCompany.toObject();
-  delete companyResponse.auth;
-  delete companyResponse.updatedAt;
-  delete companyResponse.createdAt;
+  // const companyResponse = registeredCompany.toObject();
+  // delete companyResponse.auth;
+  // delete companyResponse.updatedAt;
+  // delete companyResponse.createdAt;
 
-  const authTokens = {
-    accessToken: generateAccessToken(companyResponse._id),
-    refreshToken: generateRefreshToken(companyResponse._id)
-  };
+  // const authTokens = {
+  //   accessToken: generateAccessToken(companyResponse._id),
+  //   refreshToken: generateRefreshToken(companyResponse._id)
+  // };
 
-  const cookieOptions = {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production"
-  };
+  // const cookieOptions = {
+  //   httpOnly: true,
+  //   secure: process.env.NODE_ENV === "production"
+  // };
 
   return res
-    .status(201)
-    .cookie("accessToken", authTokens.accessToken, cookieOptions)
-    .json({
-      company: companyResponse,
-      tokens: authTokens
+    .status(201).json({
+    message:"Company Registered Successfully"
     });
 });
 

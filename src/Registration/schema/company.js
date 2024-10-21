@@ -10,15 +10,16 @@ const companySchema = new mongoose.Schema({
       type: String,
       enum: ['1-10', '11-50', '51-200', '201-500', '500+']
     },
-    website: String,
-    description: String,
-    logo: String // URL to uploaded logo
+
+    website: { type: String },
+    description: { type: String },
+    logo: {type:String} // URL to uploaded logo
   },
 
   contactInfo: {
     personName: { type: String, required: true },
     phoneNumber: { type: String, required: true },
-    address: String
+    address: { type: String }
   },
 
   auth: {

@@ -21,6 +21,9 @@ app.use(cookieParser())
 
 
 import { registration } from "./Registration/routes/index.js";
+import { login } from "./Login/routes/index.js";
+
 app.use("/register",registration)
+app.use("/login",login)
 
 export default app;

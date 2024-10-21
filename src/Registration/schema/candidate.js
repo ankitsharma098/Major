@@ -2,8 +2,8 @@ import mongoose from "mongoose";
 
 const disabilityCandidateSchema = new mongoose.Schema({
   personalInfo: {
-    firstName: { type: String, required: true },
-    lastName: { type: String, required: true },
+    username:{type : String, required:true, unique:true},
+    name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     phoneNumber: { type: String, required: true },
     address: {type: String},
